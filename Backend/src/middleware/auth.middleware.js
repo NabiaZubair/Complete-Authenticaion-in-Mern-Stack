@@ -5,13 +5,13 @@ const authMiddleware = async (req, res, next) => {
 
     try {
 
-        const token = req.cookies.token;
+        const accessToken = req.headers.authorization?.split(" ")[1]
 
-        if (!token) {
+        if (!accessToken) {
             return res.status(401).json({ message: "unotherized" })
         }
 
-        const decoded = jwt.verify(token, config.JWT_SECRET);
+        const decoded = jwt.verify(accessToken, config.ACCESS);
 
         req.user = decoded;
 

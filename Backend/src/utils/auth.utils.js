@@ -1,27 +1,35 @@
 import jwt from "jsonwebtoken"
 import config from "../config/config.js";
+import crypto from "crypto"
+
+const ACCESS_TOKEN_EXPIRES="15m";
+const REFRESH_TOKEN_EXPIRES="7d";
 
 const accessToken=(userId)=>{
     return jwt.sign({
         id:userId
     },config.ACCESS,
     {
-        expiresIn:"15m"
+        expiresIn:ACCESS_TOKEN_EXPIRES
     }
 );
 };
 const refreshToken=(userId)=>{
-    return jwt.sign({
+    return jwt.sign({                                  
         id:userId
-    },config.REFRESH,
+    },config.REFRESH,      
     {
-        expiresIn:"7d"
+        expiresIn:REFRESH_TOKEN_EXPIRES
     }
 );
 };
 
-const setRefreshToken=(res,token)=>{
-    res.cookie("refreshToken",token,{
+const hashtoken=(token)=>{
+    return crypto.createHash("sha256").update(token).digest("hex")
+}
+
+const setRefreshToken=(res,refreshToken)=>{
+    res.cookie("refreshToken",refreshToken,{
         httpOnly:true,
         secure:config.NODE_ENV==="production",
         sameSite:"lax",
@@ -29,4 +37,4 @@ const setRefreshToken=(res,token)=>{
     });
 };
 
-export {accessToken,refreshToken,setRefreshToken};
+export {accessToken,refreshToken,hashtoken,setRefreshToken};

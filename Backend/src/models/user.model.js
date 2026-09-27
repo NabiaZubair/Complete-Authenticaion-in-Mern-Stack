@@ -21,6 +21,10 @@ const userSchema = new mongoose.Schema({
         required: true,
         select: false
     },
+    isVarified:{
+        type:Boolean,
+        default:false
+    }
 }, {
     timestamps: true
 }
