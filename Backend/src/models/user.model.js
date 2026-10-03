@@ -18,10 +18,20 @@ const userSchema = new mongoose.Schema({
     },
     password: {
         type: String,
-        required: true,
         select: false
     },
-    isVarified:{
+    googleId:{
+        type:String,
+        unique:true,
+        sparse:true
+
+    },
+    authProvider:{
+        type:String,
+        enum:["local","google"],
+        default:"local"
+    },
+    isVerified:{
         type:Boolean,
         default:false
     }

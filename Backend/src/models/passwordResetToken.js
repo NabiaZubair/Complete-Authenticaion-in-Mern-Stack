@@ -23,6 +23,14 @@ const passwordResetMongooseSchema= new mongoose.Schema(
         usedAt:{
             type:Date,
             default:null
+        },
+        resetTokenHash:{
+            type:String,
+            default:null
+        },
+        resetTokenExpiresAt:{
+            type:Date,
+            default:null
         }
     },
     {timestamps:true}

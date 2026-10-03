@@ -1,12 +1,16 @@
 import {Router} from "express";
-import { registerUser, varifyOTP,loginUser,logoutUser ,refreshAccessToken,getMe,logoutAllDevices,resendOTP,forgetPassword,resetPassword} from "../controllers/auth.controller.js";
+import { registerUser, emailVerify,loginUser,logoutUser ,refreshAccessToken,getMe,
+    logoutAllDevices,resendOTP,forgetPassword,resetPassword, verifyOtp,googleLogin} from "../controllers/auth.controller.js";
 import authMiddleware from "../middleware/auth.middleware.js";
+
 const authRoutes=Router();
 
+authRoutes.post("/google-login",googleLogin)
 authRoutes.post("/register",registerUser);
-authRoutes.post("/varify-otp",varifyOTP);
+authRoutes.post("/email-verify",emailVerify);
 authRoutes.post("/resend-otp",resendOTP);
 authRoutes.post("/forget-password",forgetPassword)
+authRoutes.post("/verify-otp",verifyOtp)
 authRoutes.post("/reset-password",resetPassword)
 authRoutes.post("/login",loginUser);
 authRoutes.get("/refresh-token",refreshAccessToken);

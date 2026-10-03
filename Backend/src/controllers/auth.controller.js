@@ -13,8 +13,96 @@ import jwt from "jsonwebtoken"
 import crypto from "crypto";
 import bcrypt from "bcrypt"
 
+import { OAuth2Client } from "google-auth-library"
 
+const googleClient = new OAuth2Client(
+    process.env.GOOGLE_CLIENT_ID
+)
 
+async function googleLogin(req, res) {
+    try {
+        const { credential } = req.body
+
+        if(!credential){
+            return res.status(400).json({
+                message:"google credentials are required"
+            })
+        }
+
+        const ticket= await googleClient.verifyIdToken({
+            idToken:credential,
+            audience:process.env.GOOGLE_CLIENT_ID
+        })
+
+        const payload=ticket.getPayload();
+
+        const{sub:googleId,email,name,picture,email_verified}=payload
+
+        if(!email_verified){
+            return res.status(400).json({
+                message:"email is not verified"
+            })
+        }
+
+         console.log("Google user:",payload)
+
+        let user=await userModel.findOne({googleId})
+       
+        if(!user){
+             user= await userModel.findOne({email})
+        }
+
+        if(user){
+            if(!user.googleId){
+                user.googleId=googleId;
+                user.authProvider="google"
+                await user.save()
+            }
+        }
+
+        if(!user){
+           user=await userModel.create ({
+            username:name,
+            email:email,
+            googleId:googleId,
+              authProvider: "google"
+           })
+        }
+        
+        const newAccessToken = accessToken(user._id);
+        const newRefreshToken = refreshToken(user._id);
+
+        const refreshTokenHash = hashtoken(newRefreshToken)
+
+        const session = await sessionModel.create({
+            user: user._id,
+            refreshTokenHash,
+            expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+            userAgent: req.get("user-agent") || "unknown",
+            ip: req.ip
+
+        })
+
+        setRefreshToken(res, newRefreshToken)
+
+        res.status(200).json({
+            message: "you have been loged successfully",
+            accessToken: newAccessToken,
+            user: {
+                id: user._id,
+                username: user.username,
+                email: user.email,
+            }
+        })
+
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({
+            message:"google authentication failed"
+        })
+
+    }
+}
 
 async function registerUser(req, res) {
 
@@ -77,7 +165,7 @@ async function registerUser(req, res) {
 
 }
 
-async function varifyOTP(req, res) {
+async function emailVerify(req, res) {
     try {
         const { userId, otp } = req.body;
 
@@ -131,7 +219,7 @@ async function varifyOTP(req, res) {
         }
 
         //varify account
-        user.isVarified = true;
+        user.isVerified = true;
 
         await user.save();
 
@@ -159,7 +247,7 @@ async function varifyOTP(req, res) {
 
         res.status(201).json({
             message: "you have been registered successfully",
-            newAccessToken,
+            accessToken: newAccessToken,
             user: {
                 id: user._id,
                 username: user.username,
@@ -248,7 +336,7 @@ async function loginUser(req, res) {
 
         if (!user) {
             return res.status(401).json({
-                message: "invalid email or password"
+                message: "invalid email or password..."
             });
         }
 
@@ -261,8 +349,9 @@ async function loginUser(req, res) {
         }
 
         if (!user.isVerified) {
-            return res.status(400).json({
-                message: "Email is not varified verified"
+            return res.status(403).json({
+                message: "Email is not verified",
+                userId: user._id
             });
         }
 
@@ -284,7 +373,7 @@ async function loginUser(req, res) {
 
         res.status(200).json({
             message: "you have been loged successfully",
-            newAccessToken,
+            accessToken: newAccessToken,
             user: {
                 id: user._id,
                 username: user.username,
@@ -299,7 +388,6 @@ async function loginUser(req, res) {
         })
     }
 }
-
 
 async function forgetPassword(req, res) {
     try {
@@ -345,12 +433,11 @@ async function forgetPassword(req, res) {
     }
 }
 
-async function resetPassword(req, res) {
+async function verifyOtp(req, res) {
     try {
-        const { email, otp, newPassword } = req.body
+        const { email, otp } = req.body
 
         const user = await userModel.findOne({ email })
-
 
         if (!user) {
             return res.status(400).json({
@@ -358,21 +445,20 @@ async function resetPassword(req, res) {
             })
         }
 
-        const resetToken = await passwordResetToken.findOne({
+        const resetRecord = await passwordResetToken.findOne({
             user: user._id,
-            usedAt:null,
-            expiresAt:{$gt:new Date()}
-           
+            usedAt: null,
+            expiresAt: { $gt: new Date() }
+
         })
 
-        if (!resetToken) {
+        if (!resetRecord) {
             return res.status(400).json({
                 message: "invalid or expired otp"
             })
         }
 
-
-        if (resetToken.attemptes > 5) {
+        if (resetRecord.attemptes >= 5) {
             return res.status(429).json({
                 message: "too many request. request a new otp"
             })
@@ -382,36 +468,78 @@ async function resetPassword(req, res) {
         const otpHash = hashOTP(otp);
 
         //compare 
-        if (otpHash !== resetToken.otpHash) {
-            resetToken.attemptes += 1;
-            await resetToken.save();
+        if (otpHash !== resetRecord.otpHash) {
+            resetRecord.attemptes += 1;
+            await resetRecord.save();
             return res.status(400).json({
                 message: "invalid otp"
             })
         }
 
 
-        user.password=newPassword;
+        const resetToken = crypto.randomBytes(32).toString("hex");
+        const resetTokenHash = crypto.createHash("sha256").update(resetToken).digest("hex")
 
-        await user.save();
+        resetRecord.resetTokenHash = resetTokenHash
+        resetRecord.resetTokenExpiresAt = new Date(Date.now() + 10 * 60 * 1000)
 
-        resetToken.usedAt= new Date()
-        await resetToken.save()
-
+        await resetRecord.save()
 
         return res.status(200).json({
-            message:"password reset successfuly"
+            message: "otp is verified successfully",
+            resetToken
         })
-
-
-    } catch (err) {
-        console.log(err);
-
+    } catch (error) {
+        console.log(error)
         return res.status(500).json({
-            message:"something went wrong"
+            message: "server error"
+        })
+    }
+}
+
+async function resetPassword(req, res) {
+
+    const { newPassword, resetToken } = req.body;
+    try {
+        const resetTokenHash = crypto.createHash("sha256").update(resetToken).digest("hex")
+
+        const resetTokenRecord = await passwordResetToken.findOne({
+            resetTokenHash,
+            usedAt: null,
+            resetTokenExpiresAt: { $gt: new Date() }
         })
 
+        if (!resetTokenRecord) {
+            return res.status(400).json({
+                message: "invalid or expired reset token"
+            })
+        }
+
+        const user = await userModel.findById(resetTokenRecord.user)
+
+        if (!user) {
+            return res.status(400).json({
+                message: "user not found"
+            })
+        }
+
+        user.password = newPassword;
+        await user.save();
+
+        resetTokenRecord.usedAt = new Date()
+        await resetTokenRecord.save()
+
+        return res.status(200).json({
+            message: "password reset successfully"
+        })
+
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({
+            message: "sever error"
+        })
     }
+
 }
 
 async function refreshAccessToken(req, res) {
@@ -551,10 +679,22 @@ async function logoutAllDevices(req, res) {
 }
 
 async function getMe(req, res) {
-    res.status(200).json({
-        message: "user fetched successfuly",
-        user: req.user
-    })
+    try {
+        res.status(200).json({
+            message: "user fetched successfuly",
+            user: req.user
+        })
+    } catch (error) {
+        res.status(500).json({
+            message: "internal server Error"
+        })
+    }
+
 }
 
-export { registerUser, varifyOTP, loginUser, logoutUser, getMe, refreshAccessToken, logoutAllDevices, resendOTP, forgetPassword,resetPassword }
+export {
+    registerUser, emailVerify, loginUser,
+    logoutUser, getMe, refreshAccessToken,
+    logoutAllDevices, resendOTP, forgetPassword,
+    verifyOtp, resetPassword,googleLogin
+}
