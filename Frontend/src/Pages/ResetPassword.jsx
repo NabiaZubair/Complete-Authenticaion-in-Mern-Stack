@@ -59,9 +59,9 @@ const ResetPassword = () => {
     }
   }
   return (
-    <div className='flex items-center justify-center h-screen '>
-      <div className='bg-rose-400 p-6 '>
-        <h1 className='font-semibold, text-center text-2xl'>Reset Password</h1>
+    <div className='flex items-center justify-center h-screen bg-linear-to-bl from-violet-500 to-fuchsia-400 '>
+      <div className='flex  flex-col  w-100  border border-gray-400 p-7 rounded-xl bg-white '>
+        <h1 className='font-medium text-3xl text-center mb-6  text-purple-700'>Reset Password</h1>
         <form onSubmit={handleSubmit} >
           <div>
             <input
@@ -70,11 +70,11 @@ const ResetPassword = () => {
               value={password}
               onChange={handleChange}
               placeholder='enter password '
-              className='bg-purple-600 border-2 border-black p-2 rounded-2xl'
+              className='w-full border border-gray-300 p-2 rounded mb-4'
             /></div>
 
           <div className='flex items-center justify-center'>
-            <button type='submit' disabled={loading} className='bg-amber-700 rounded-full p-1 w-30 mt-4'> {loading ? "Resetting..." : "Reset"}</button>
+            <button type='submit' disabled={loading}   className='bg-purple-700 text-white rounded-xl  p-1.5  font-normal text-lg mt-4 w-40'> {loading ? "Resetting..." : "Reset"}</button>
           </div>
         </form>
       </div>

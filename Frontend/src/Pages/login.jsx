@@ -5,7 +5,7 @@ import { useContext } from 'react';
 import { AuthContext } from '../context/authContext';
 import { GoogleLogin } from '@react-oauth/google';
 import toast from 'react-hot-toast';
-import { Mail } from 'lucide-react';
+import { Mail, Lock } from 'lucide-react';
 
 
 const Login = () => {
@@ -48,7 +48,7 @@ const Login = () => {
 
     } catch (error) {
 
-      toast.error( error.response?.data ||"Login Failed");
+      toast.error(error.response?.data || "Login Failed");
 
       if (error.response?.status === 403) {
         setUnverifiedUserId(error.response.data.userId);
@@ -86,7 +86,7 @@ const Login = () => {
 
     } catch (error) {
       console.log("RESEND OTP ERROR:", error);
-      toast.error( error.response?.data?.message ||"Failed to Resend OTP")
+      toast.error(error.response?.data?.message || "Failed to Resend OTP")
     }
   };
 
@@ -109,58 +109,62 @@ const Login = () => {
       navigate("/");
 
     } catch (error) {
-      toast.error(error.response?.data?.message||"Google Login Failed")
+      toast.error(error.response?.data?.message || "Google Login Failed")
     }
 
   }
   return (
-    <div className='min-h-screen flex justify-center items-center bg-linear-to-br from-sky-50 via-blue-100 to-sky-200 '>
-      <div className='flex  flex-col  w-100  border-2 border-black p-2 '>
-
-        <h1 className='font-medium text-3xl text-center mb-4'>Login</h1>
-        <h2 className='text-lg  text-center '>Please enter your credentials to Access your account</h2>
+    <div className='min-h-screen flex justify-center items-center   bg-linear-to-bl from-violet-500 to-fuchsia-400'>
+      <div className='flex  flex-col  w-100  border border-gray-400 p-7 rounded-xl bg-white'>
+        <h1 className='font-medium text-3xl text-center mb-4 text-purple-700'>Login</h1>
+        <h2 className=' text-center mb-4 '>Please enter your credentials to Access your account</h2>
         <form onSubmit={handleSubmit}
-          className='flex flex-col gap-2'>
-          <div className='relative w-full'>
-            <label htmlFor='email'>Email</label>
-             <Mail className='absolute top-10' />
+          className='flex flex-col gap-3'>
+
+          <div className='relative w-full flex flex-col'>
+            <label htmlFor='email' className='text-sm text-gray-600'>Email</label>
             <input
-              className='border border-gray-400 p-2 rounded-lg '
+              className='border border-gray-400 pl-9 p-2 rounded-lg relative text-gray-600'
               type="email"
               name="email"
               placeholder='enter email'
               value={formData.email}
               onChange={handleChange}
             />
+            <Mail className='absolute top-8 left-2 text-gray-500' size={20} />
           </div>
-          <div>
-            <label htmlFor='password'>Password</label>
-            <Lock />
+
+          <div className='relative w-full flex flex-col  '>
+            <label htmlFor='password' className='text-sm text-gray-600'>Password</label>
             <input
-              className='border border-gray-400  p-2 rounded-lg w-full'
+              className='border border-gray-400 pl-9 p-2 rounded-lg text-gray-500'
               type="password"
               name="password"
               placeholder='enter your password'
               value={formData.password}
               onChange={handleChange}
             />
+            <Lock className='absolute top-8 left-2 text-gray-500' size={20} />
           </div>
-          <button className='text-start' type='button' onClick={() => navigate("/forget-password")}>forget Password</button>
+
+          <div className='flex justify-end text-purple-700'>
+            <button className='text-start' type='button' onClick={() => navigate("/forget-password")}>forget Password</button>
+          </div>
 
 
-        
-          {unverifiedUserId && (
-            <button type="button" onClick={handleResendOTP}>
-              Verify Email
-            </button>
-          )}
+          <div className='flex justify-center w-full'>
+            {unverifiedUserId && (
+              <button  className='bg-purple-700 text-white rounded-xl w-full p-2 mb-3 font-normal text-xl' type="button" onClick={handleResendOTP}>
+                Verify Email
+              </button>
+            )}
+          </div>
 
 
 
           <div className='flex justify-center w-full'>
-
             <button type="submit" disabled={loading}
-              className='bg-sky-300 rounded-full w-50 px-4 py-1 mb-3'
+              className='bg-purple-700 text-white rounded-xl w-full p-2 mb-3 font-normal text-lg'
             >{loading ? "Logging in..." : "Login"}</button>
           </div>
 
@@ -170,14 +174,22 @@ const Login = () => {
         <div className='text-center'>
           <p>
             Don't have and account?
-            <button type='button' onClick={() => navigate("/register")}>Sign up</button>
+            <button className='text-purple-700 mb-2 ' type='button' onClick={() => navigate("/register")}>Sign up</button>
           </p>
         </div>
-        <div>
-          <GoogleLogin onSuccess={handleGoogleLogin}
+        <div className='text-center mb-2'>or</div>
+        <div >
+          <GoogleLogin
+            onSuccess={handleGoogleLogin}
             onError={() => {
               console.log(" Google Login failed")
-            }} />
+            }}
+            theme="outline"
+            size="large"
+            text="continue_with"
+            shape="rectangular"
+            width="340"
+          />
         </div>
 
       </div >

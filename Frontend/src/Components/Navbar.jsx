@@ -11,7 +11,7 @@ const Navbar = () => {
 
   return (
     <div className='flex justify-between px-10 py-4'>
-      <h2 className='text-purple-500 font-bold text-2xl'>Atuthentication</h2>
+      <h2 className='text-purple-700 font-bold text-2xl'>Atuthentication</h2>
       {user ? (
         <ProfileMenu />
       ) : (

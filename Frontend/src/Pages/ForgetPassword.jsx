@@ -28,12 +28,12 @@ const ForgetPassword = () => {
       )
       console.log("otp is sent to you accout ", response.data)
       toast.success("OTP has been sent to your email")
-      navigate("/verify-otp",{
-        state:{email:email}
+      navigate("/verify-otp", {
+        state: { email: email }
       })
     } catch (error) {
-      toast.error(error.response?.data?.message||"Failed to send OTP")
-    }finally{
+      toast.error(error.response?.data?.message || "Failed to send OTP")
+    } finally {
       setLoading(false)
     }
   }
@@ -41,12 +41,11 @@ const ForgetPassword = () => {
 
 
   return (
-    <div className='flex items-center justify-center h-screen'>
-      <div className='bg-pink-400 p-4'>
-        <h1 className='font-semibold text-2xl text-center'>Forgot Password?</h1>
-        <h2 className='text-center'>Enter your Email and We will send you an OTP</h2>
-        <form onSubmit={handleSubmit}
-        className='flex flex-col'>
+    <div className='flex items-center justify-center h-screen bg-linear-to-bl from-violet-500 to-fuchsia-400'>
+      <div className='bg-white p-6 border border-gray-300 rounded-xl'>
+        <h1 className='font-semibold text-2xl text-center text-purple-700 mb-4'>Forgot Password?</h1>
+        <h2 className='text-center mb-4'>Enter your Email and We will send you an OTP</h2>
+        <form onSubmit={handleSubmit} className='flex flex-col gap-6'>
           <input
             id='email'
             type='email'
@@ -54,13 +53,13 @@ const ForgetPassword = () => {
             placeholder='enter your email'
             value={email}
             onChange={handleChange}
-            className='border-2 border-black rounded-2xl p-1'
+             className='border border-gray-400  p-2 rounded-lg relative text-gray-600 w-full'
           />
-          <div className='flex items-center justify-center mt-4'>
-          <button type='submit' disabled={loading}
-          className='bg-sky-500 w-30 rounded-full p-2'>
-            {loading?"otp is sending":"send OTP"} </button>
-            </div>
+          <div  className='flex justify-center '>
+            <button type='submit' disabled={loading}
+               className='bg-purple-700 text-white rounded-xl  p-2 mb-3 font-normal text-lg w-46'>
+              {loading ? "otp is sending" : "Send OTP"} </button>
+          </div>
         </form>
       </div>
     </div>

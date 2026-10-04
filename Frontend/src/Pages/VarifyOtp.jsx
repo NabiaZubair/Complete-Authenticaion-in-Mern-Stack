@@ -57,7 +57,7 @@ const VarifyOtp = () => {
 
     const newOtp = [...otp]
 
-    pastedData.split("").forEach((digit,index) =>
+    pastedData.split("").forEach((digit, index) =>
       newOtp[index] = digit
     )
 
@@ -71,7 +71,7 @@ const VarifyOtp = () => {
     e.preventDefault()
 
     const otpValue = otp.join("")
-  
+
 
     if (otpValue.length !== 6) {
       toast.error("please enter the complete 6 digit otp ")
@@ -95,8 +95,8 @@ const VarifyOtp = () => {
         state: { resetToken: response.data.resetToken }
       })
     } catch (error) {
-      toast.error(error.response?.data?.message||"OTP Verification failed")
-    
+      toast.error(error.response?.data?.message || "OTP Verification failed")
+
     } finally {
       setLoading(false)
 
@@ -116,56 +116,61 @@ const VarifyOtp = () => {
           withCredentials: true
         }
       )
-  
+
       toast.success("OTP has been sent to your Email")
       setOtp(["", "", "", "", "", ""])
 
       setTimer(60);
       inputRefs.current[0]?.focus()
     } catch (error) {
-      toast.error(  error.response?.data?.message || "Failed to resend otp")
-    
+      toast.error(error.response?.data?.message || "Failed to resend otp")
+
     } finally { setResendLoading(false) }
   }
 
 
   return (
-    <div className='flex items-center justify-center h-screen'>
-      <div  className='bg-sky-300'>
-        <h1 className='text-center text-2xl font-semibold'>verify Otp</h1>
-        <form onSubmit={handleSubmit} >
-          <div>
-          {otp.map((digit, index) => (
-            <input
-              key={index}
-              ref={(element) => {
-                inputRefs.current[index] = element
-              }}
-              type='text'
-              inputMode='numeric'
-              maxLength={1}
-              value={digit}
-              onChange={(e) => handleChange(e.target.value, index)}
-              onKeyDown={(e) => handleKeyDown(e, index)}
-              onPaste={handlePaste}
-              className='bg-amber-100 m-1 w-10'
-            />
-          ))}
+    <div className='flex items-center justify-center h-screen bg-linear-to-bl from-violet-500 to-fuchsia-400'>
+
+      <div className='flex  flex-col  w-100  border border-gray-400 p-7 rounded-xl bg-white'>
+        <h1 className='font-medium text-3xl text-center mb-6  text-purple-700'>Verify OTP</h1>
+        <form onSubmit={handleSubmit} className='flex  flex-col gap-2' >
+          <div className='flex justify-center gap-4'>
+            {otp.map((digit, index) => (
+              <input
+                key={index}
+                ref={(element) => {
+                  inputRefs.current[index] = element
+                }}
+                type='text'
+                inputMode='numeric'
+                maxLength={1}
+                value={digit}
+                onChange={(e) => handleChange(e.target.value, index)}
+                onKeyDown={(e) => handleKeyDown(e, index)}
+                onPaste={handlePaste}
+                className='border border-gray-400  text-gray-600 h-12 w-12 rounded'
+              />
+            ))}
           </div>
-          <div className='flex items-center justify-center'>
-          <button disabled={loading}
-          className='bg-pink-600 w-30 p-1 rounded-full'>
-            {loading ? "Verifying" : "Verify"}</button></div>
+
+          <div className='flex justify-center text-purple-700'>
+            <button disabled={loading}
+             className='bg-purple-700 text-white rounded-xl  p-2 mb-3 font-normal text-lg mt-4 w-48'>
+              {loading ? "Verifying" : "Verify"}</button>
+          </div>
+
         </form>
-        <div className="flex items-center justify-center mt-4">
+
+        <div className="flex items-center justify-center ">
           {timer > 0 ? (<p>Resend Otp in {""}<span>{timer}s</span></p>)
             : (<button type="button" disabled={resendLoading} onClick={handleResendOtp}
-              className="bg-purple-800 rounded-full w-40 p-1">
+              className='bg-pink-600 text-white rounded-xl  p-2 mb-3 font-normal  mt-4 w-30'>
               {resendLoading ? "Sending" : "Resend Otp"}
             </button>)}
         </div>
-
       </div>
+
     </div>
   )
 }

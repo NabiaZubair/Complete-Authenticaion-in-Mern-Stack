@@ -135,12 +135,12 @@ const EmailVarification = () => {
 
 
   return (
-    <div className="flex items-center justify-center h-screen">
-      <div className=" bg-purple-300 p-6">
-        <h1 className="text-center font-semibold text-2xl mb-4">Verify your Email</h1>
+    <div className="flex items-center justify-center h-screen bg-linear-to-bl from-violet-500 to-fuchsia-400">
+      <div className='flex  flex-col  w-100  border border-gray-400 p-7 rounded-xl bg-white'>
+        <h1 className='font-medium text-3xl text-center mb-6  text-purple-700'>Verify your Email</h1>
         <p className="text-center mb-4">Enter 6-digit OTP sent to you Email</p>
         <form onSubmit={handleSubmit}>
-          <div>
+          <div  className='flex justify-center gap-4'>
             {otp.map((digit, index) => (
               <input
                 key={index}
@@ -154,26 +154,26 @@ const EmailVarification = () => {
                 onChange={(e) => handleChange(e.target.value, index)}
                 onKeyDown={(e) => handleKeyDown(e, index)}
                 onPaste={handlePaste}
-                className="w-12 h-12 bg-amber-100 border-2 border-t-black m-1"
+                 className='w-full border border-gray-300 p-2 rounded mb-4'
               />
             ))}
 
           </div>
 
-          <div className="flex items-center justify-center mt-4">
+          <div className='flex justify-center text-purple-700'>
             <button
               type="submit"
               disabled={loading}
-              className="bg-purple-700 rounded-full w-30 p-1"
+              className='bg-purple-700 text-white rounded-xl  p-2 mb-3 font-normal text-lg mt-4 w-48'
             >
               {loading ? "Veriying..." : "Verify"}</button>
           </div>
         </form>
 
-        <div className="flex items-center justify-center mt-4">
+        <div className="flex items-center justify-center ">
           {timer > 0 ? (<p>Resend Otp in {""}<span>{timer}s</span></p>)
             : (<button type="button" disabled={resendLoading} onClick={handleResendOtp}
-              className="bg-purple-800 rounded-full w-40 p-1">
+             className='bg-pink-600 text-white rounded-xl  p-2 mb-3 font-normal  mt-4 w-30'>
               {resendLoading ? "sending" : "Resend Otp"}
             </button>)}
         </div>
